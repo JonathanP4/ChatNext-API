@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
-import { UserType } from "./chat.js";
 import { getToken } from "../util/getToken.js";
 
 dotenv.config();
@@ -28,9 +27,12 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({
-                message:
-                    "Email already in use, try another one or login instead",
-                status: 400,
+                message: [
+                    {
+                        msg: "Email invalid",
+                        status: 400,
+                    },
+                ],
             });
         }
 
@@ -63,9 +65,14 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            return res
-                .status(401)
-                .json({ message: "Email or password are incorrect" });
+            return res.status(401).json({
+                message: [
+                    {
+                        msg: "Email or password are incorrect",
+                        status: 401,
+                    },
+                ],
+            });
         }
 
         const passwordCorrect = await bcrypt.compare(password, user.password);

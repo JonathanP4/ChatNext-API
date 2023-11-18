@@ -19,8 +19,12 @@ export async function signup(req, res, next) {
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({
-                message: "Email already in use, try another one or login instead",
-                status: 400,
+                message: [
+                    {
+                        msg: "Email invalid",
+                        status: 400,
+                    },
+                ],
             });
         }
         const user = new User({
@@ -48,9 +52,14 @@ export async function login(req, res, next) {
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            return res
-                .status(401)
-                .json({ message: "Email or password are incorrect" });
+            return res.status(401).json({
+                message: [
+                    {
+                        msg: "Email or password are incorrect",
+                        status: 401,
+                    },
+                ],
+            });
         }
         const passwordCorrect = await bcrypt.compare(password, user.password);
         if (!passwordCorrect) {

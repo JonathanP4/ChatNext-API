@@ -78,7 +78,7 @@ export async function postMessage(
         const user = await User.findById(decoded.userId);
 
         if (!user) {
-            return response.status(500).json("User not found");
+            return res.status(500).json("User not found");
         }
 
         const message = new Message({

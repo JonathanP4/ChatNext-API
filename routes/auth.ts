@@ -11,7 +11,12 @@ router.post(
     [
         body("email", "Invalid email").trim().isEmail().normalizeEmail(),
         body("name", "Name required").trim().notEmpty(),
-        body("password", "Password required").trim().notEmpty(),
+        body("password")
+            .isLength({ min: 6 })
+            .withMessage("Password should be at least 6 characters long")
+            .trim()
+            .notEmpty()
+            .withMessage("Password required"),
     ],
     authController.signup
 );

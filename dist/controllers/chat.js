@@ -49,7 +49,7 @@ export async function postMessage(req, res, next) {
         const decoded = jwt.decode(token);
         const user = await User.findById(decoded.userId);
         if (!user) {
-            return response.status(500).json("User not found");
+            return res.status(500).json("User not found");
         }
         const message = new Message({
             content,
