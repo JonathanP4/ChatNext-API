@@ -1,7 +1,6 @@
-import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 import { response } from "express";
-import { getToken } from "../util/getToken.js";
+import { decodeToken, getToken } from "../util/token.js";
 import Message from "../models/message.js";
 import socket from "../socket.js";
 import fs from "fs";
@@ -10,8 +9,10 @@ import { __dirname } from "../app.js";
 export async function getUsers(req, res, next) {
     try {
         const token = getToken(req);
-        const decoded = jwt.decode(token);
-        const users = await User.find().select("-password");
+        const decoded = decodeToken(token);
+        const users = await User.find()
+            .select("-password")
+            .populate("messages");
         const filteredUsers = users.filter((u) => u._id.toString() !== decoded.userId.toString());
         if (!users) {
             return res.status(500).json({
@@ -45,17 +46,19 @@ export async function getUser(req, res, next) {
 export async function postMessage(req, res, next) {
     try {
         const content = req.body.message;
+        const contact = req.body.user;
         const token = getToken(req);
-        const decoded = jwt.decode(token);
+        const decoded = decodeToken(token);
         const user = await User.findById(decoded.userId);
         if (!user) {
             return res.status(500).json("User not found");
         }
         const message = new Message({
             content,
+            from: user._id,
+            to: contact._id,
         });
         user.messages.unshift(message._id);
-        message.user = user._id;
         await message.save();
         await user.save();
         const io = socket.getIo();
@@ -67,13 +70,22 @@ export async function postMessage(req, res, next) {
 }
 export async function getMessages(req, res, next) {
     try {
+        const contactId = req.params.userId;
         const token = getToken(req);
-        const decoded = jwt.decode(token);
-        const user = await User.findById(decoded.userId).populate("messages");
-        if (!user) {
+        const decoded = decodeToken(token);
+        const userMessages = await Message.find({
+            from: decoded.userId,
+            to: contactId,
+        });
+        const contactMessages = await Message.find({
+            from: contactId,
+            to: decoded.userId,
+        });
+        if (!userMessages || !contactMessages) {
+            console.log("here");
             return response.status(500).json("User not found");
         }
-        const messages = user.messages.reverse();
+        const messages = [...userMessages, ...contactMessages].sort((a, b) => a._id.toString().localeCompare(b._id.toString()));
         return res.status(200).json({ messages });
     }
     catch (error) {

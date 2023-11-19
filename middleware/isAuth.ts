@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Request, Response, NextFunction } from "express";
-import { getToken } from "../util/getToken.js";
+import { getToken } from "../util/token.js";
 
 dotenv.config();
 

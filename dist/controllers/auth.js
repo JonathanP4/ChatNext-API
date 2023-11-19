@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
-import { getToken } from "../util/getToken.js";
+import { getToken } from "../util/token.js";
 dotenv.config();
 const secret = process.env.SECRET;
 export async function signup(req, res, next) {

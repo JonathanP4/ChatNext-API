@@ -6,7 +6,7 @@ const messageSchema = new Schema(
             type: String,
             required: true,
         },
-        user: {
+        from: {
             type: Schema.Types.ObjectId,
             ref: "User",
         },

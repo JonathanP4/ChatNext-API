@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { getToken } from "../util/getToken.js";
+import { getToken } from "../util/token.js";
 dotenv.config();
 const secret = process.env.SECRET;
 export default function isAuth(req, res, next) {
