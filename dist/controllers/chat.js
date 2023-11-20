@@ -11,6 +11,7 @@ const message_1 = __importDefault(require("../models/message"));
 const socket_1 = __importDefault(require("../socket"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const root_path_1 = require("../util/root-path");
 async function getUsers(req, res, next) {
     try {
         const token = (0, token_1.getToken)(req);
@@ -104,7 +105,7 @@ exports.getMessages = getMessages;
 async function updateProfile(req, res, next) {
     const name = req.body.name;
     const status = req.body.status;
-    const image = req.file?.path.replaceAll("src\\", "");
+    const image = req.file?.path.replaceAll("public\\", "");
     const userId = req.params.userId;
     try {
         const user = await user_1.default.findById(userId);
@@ -112,7 +113,7 @@ async function updateProfile(req, res, next) {
             return express_1.response.status(500).json("User not found");
         }
         if (user.image !== "images/placeholder.jpg") {
-            fs_1.default.unlink(path_1.default.join(__dirname, "..", user.image), () => {
+            fs_1.default.unlink(path_1.default.join(root_path_1.rootPath, "..", "public", user.image), () => {
                 console.log("deleted file");
             });
         }
