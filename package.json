@@ -4,7 +4,7 @@
     "description": "",
     "scripts": {
         "build": "pnpm install && tsc",
-        "dev": "nodemon ./src/app.ts"
+        "dev": "nodemon ./dist/app.js"
     },
     "keywords": [],
     "author": "",
