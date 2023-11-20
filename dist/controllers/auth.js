@@ -1,13 +1,19 @@
-import dotenv from "dotenv";
-import bcrypt from "bcrypt";
-import User from "../models/user.js";
-import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
-import { getToken } from "../util/token.js";
-dotenv.config();
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.logout = exports.login = exports.signup = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const user_1 = __importDefault(require("../models/user"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const express_validator_1 = require("express-validator");
+const token_1 = require("../util/token");
+dotenv_1.default.config();
 const secret = process.env.SECRET;
-export async function signup(req, res, next) {
-    const errors = validationResult(req);
+async function signup(req, res, next) {
+    const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         return res.status(401).json({ message: errors.array() });
     }
@@ -15,8 +21,8 @@ export async function signup(req, res, next) {
     const name = req.body.name;
     const password = req.body.password;
     try {
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const userExists = await User.findOne({ email });
+        const hashedPassword = await bcrypt_1.default.hash(password, 12);
+        const userExists = await user_1.default.findOne({ email });
         if (userExists) {
             return res.status(400).json({
                 message: [
@@ -27,7 +33,7 @@ export async function signup(req, res, next) {
                 ],
             });
         }
-        const user = new User({
+        const user = new user_1.default({
             email,
             name,
             password: hashedPassword,
@@ -42,15 +48,16 @@ export async function signup(req, res, next) {
         next(error);
     }
 }
-export async function login(req, res, next) {
-    const errors = validationResult(req);
+exports.signup = signup;
+async function login(req, res, next) {
+    const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         return res.status(401).json({ message: errors.array() });
     }
     const email = req.body.email;
     const password = req.body.password;
     try {
-        const user = await User.findOne({ email });
+        const user = await user_1.default.findOne({ email });
         if (!user) {
             return res.status(401).json({
                 message: [
@@ -61,13 +68,13 @@ export async function login(req, res, next) {
                 ],
             });
         }
-        const passwordCorrect = await bcrypt.compare(password, user.password);
+        const passwordCorrect = await bcrypt_1.default.compare(password, user.password);
         if (!passwordCorrect) {
             return res
                 .status(401)
                 .json({ message: "Email or password are incorrect" });
         }
-        const token = jwt.sign({ email: user.email, userId: user._id }, secret);
+        const token = jsonwebtoken_1.default.sign({ email: user.email, userId: user._id }, secret);
         res.cookie("token", token);
         return res.status(200).json({ message: "Login successfull", token });
     }
@@ -75,13 +82,15 @@ export async function login(req, res, next) {
         next(error);
     }
 }
-export async function logout(req, res, next) {
+exports.login = login;
+async function logout(req, res, next) {
     try {
-        const token = getToken(req);
-        jwt.verify(token, secret);
+        const token = (0, token_1.getToken)(req);
+        jsonwebtoken_1.default.verify(token, secret);
         return res.status(200).json({ message: "Logout successfull" });
     }
     catch (error) {
         next(error);
     }
 }
+exports.logout = logout;

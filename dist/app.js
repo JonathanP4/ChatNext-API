@@ -1,31 +1,33 @@
-import path from "path";
-import { randomUUID } from "crypto";
-import { fileURLToPath } from "url";
-import express from "express";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-import bodyParser from "body-parser";
-import multer from "multer";
-import cors from "cors";
-import io from "./socket.js";
-import cookieParser from "cookie-parser";
-import authRoutes from "./routes/auth.js";
-import chatRoutes from "./routes/chat.js";
-dotenv.config();
-export const __filename = fileURLToPath(import.meta.url);
-export const __dirname = path.dirname(__filename);
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const path_1 = __importDefault(require("path"));
+const crypto_1 = require("crypto");
+const express_1 = __importDefault(require("express"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const body_parser_1 = __importDefault(require("body-parser"));
+const multer_1 = __importDefault(require("multer"));
+const cors_1 = __importDefault(require("cors"));
+const socket_1 = __importDefault(require("./socket"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const auth_1 = __importDefault(require("./routes/auth"));
+const chat_1 = __importDefault(require("./routes/chat"));
+dotenv_1.default.config();
 const port = process.env.PORT;
 const uri = process.env.URI;
 const secret = process.env.SECRET;
-const app = express();
-app.use(cookieParser(secret));
-const diskStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, "./images"),
+const app = (0, express_1.default)();
+app.use((0, cookie_parser_1.default)(secret));
+const diskStorage = multer_1.default.diskStorage({
+    destination: (req, file, cb) => cb(null, "./src/images"),
     filename: (req, file, cb) => {
-        cb(null, randomUUID() + "-" + file.originalname);
+        cb(null, (0, crypto_1.randomUUID)() + "-" + file.originalname);
     },
 });
-const upload = multer({
+const upload = (0, multer_1.default)({
     dest: "./images",
     storage: diskStorage,
     fileFilter: (req, file, cb) => {
@@ -40,24 +42,27 @@ const upload = multer({
         }
     },
 });
-app.use(cors({
+app.use((0, cors_1.default)({
     origin: "*",
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: "POST,PUT,DELETE,GET,PATCH",
 }));
-app.use("/images", express.static(path.join(__dirname, "..", "/images")));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(cookieParser(secret));
+app.use("/images", express_1.default.static(path_1.default.join(__dirname, "images")));
+app.use(body_parser_1.default.urlencoded({ extended: false }));
+app.use(body_parser_1.default.json());
+app.use((0, cookie_parser_1.default)(secret));
 app.use(upload.single("image"));
-app.use("/auth", authRoutes);
-app.use("/chat", chatRoutes);
+app.use("/auth", auth_1.default);
+app.use("/chat", chat_1.default);
+app.use("/hello", (req, res) => {
+    res.write(path_1.default.join(__dirname, "images"));
+});
 app.use((err, req, res, next) => {
     res.status(500).json({ message: err.message });
 });
 (async function main() {
     try {
-        await mongoose.connect(uri);
+        await mongoose_1.default.connect(uri);
         const server = app.listen(port, () => console.log("⚡[server]: Server listening on port " + port));
         // await Message.deleteMany();
         // const users = await User.find();
@@ -65,7 +70,7 @@ app.use((err, req, res, next) => {
         //     user.messages = [];
         //     await user.save();
         // });
-        io.init(server).on("connection", (socket) => console.log("Client connected"));
+        socket_1.default.init(server).on("connection", (socket) => console.log("Client connected"));
     }
     catch (error) {
         console.log(error);
