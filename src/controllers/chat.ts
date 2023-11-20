@@ -6,6 +6,7 @@ import Message from "../models/message";
 import socket from "../socket";
 import fs from "fs";
 import path from "path";
+import { rootPath } from "../util/root-path";
 
 export async function getUsers(
     req: Request,
@@ -134,7 +135,7 @@ export async function updateProfile(
 ) {
     const name = req.body.name;
     const status = req.body.status;
-    const image = req.file?.path.replaceAll("src\\", "");
+    const image = req.file?.path.replaceAll("public\\", "");
     const userId = req.params.userId;
 
     try {
@@ -145,9 +146,12 @@ export async function updateProfile(
         }
 
         if (user.image !== "images/placeholder.jpg") {
-            fs.unlink(path.join(__dirname, "..", user.image as string), () => {
-                console.log("deleted file");
-            });
+            fs.unlink(
+                path.join(rootPath, "..", "public", user.image as string),
+                () => {
+                    console.log("deleted file");
+                }
+            );
         }
 
         user.name = name;
