@@ -14,6 +14,8 @@ import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth";
 import chatRoutes from "./routes/chat";
+import Message from "./models/message";
+import User from "./models/user";
 
 dotenv.config();
 
@@ -85,17 +87,15 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
             console.log("⚡[server]: Server listening on port " + port)
         );
 
-        // await Message.deleteMany();
-        // const users = await User.find();
+        await Message.deleteMany();
+        const users = await User.find();
 
-        // users.forEach(async (user) => {
-        //     user.messages = [];
-        //     await user.save();
-        // });
+        users.forEach(async (user) => {
+            user.messages = [];
+            await user.save();
+        });
 
-        io.init(server).on("connection", (socket) =>
-            console.log("Client connected")
-        );
+        io.init(server);
     } catch (error) {
         console.log(error);
     }

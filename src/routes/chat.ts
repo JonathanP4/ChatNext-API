@@ -11,6 +11,6 @@ router.get("/messages/:userId", isAuth, chatControllers.getMessages);
 router.post("/send", isAuth, chatControllers.getUsers);
 router.post("/message", isAuth, chatControllers.postMessage);
 
-router.patch("/user/update/:userId", isAuth, chatControllers.updateProfile);
+router.post("/user/update/:userId", isAuth, chatControllers.updateProfile);
 
 export default router;

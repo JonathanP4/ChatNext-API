@@ -4,9 +4,6 @@ import { decodeToken, getToken } from "../util/token";
 import Message from "../models/message";
 
 import socket from "../socket";
-import fs from "fs";
-import path from "path";
-import { rootPath } from "../util/root-path";
 
 export async function getUsers(
     req: Request,
@@ -133,11 +130,15 @@ export async function updateProfile(
     res: Response,
     next: NextFunction
 ) {
+    // uncomment this variable if you want to upload files instead of urls
+    // const image = req.file?.path.replaceAll("public\\", "");
+
     const name = req.body.name;
     const status = req.body.status;
-    const image = req.file?.path.replaceAll("public\\", "");
     const userId = req.params.userId;
 
+    // remove this variable if you want to upload files instead of urls
+    const image = req.body.image;
     try {
         const user = await User.findById(userId);
 
@@ -145,18 +146,19 @@ export async function updateProfile(
             return response.status(500).json("User not found");
         }
 
-        if (user.image !== "images/placeholder.jpg") {
-            fs.unlink(
-                path.join(rootPath, "..", "public", user.image as string),
-                () => {
-                    console.log("deleted file");
-                }
-            );
-        }
+        // uncomment this code if you want to upload files instead of urls
+        // if (user.image !== "images/placeholder.jpg") {
+        //     fs.unlink(
+        //         path.join(rootPath, "..", "public", user.image as string),
+        //         () => {
+        //             console.log("deleted file");
+        //         }
+        //     );
+        // }
 
         user.name = name;
         user.status = status;
-        user.image = image;
+        user.image = image || user.image;
 
         await user.save();
 
