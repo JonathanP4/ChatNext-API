@@ -158,7 +158,7 @@ export async function updateProfile(
 
         user.name = name;
         user.status = status;
-        user.image = image || user.image;
+        user.image = image;
 
         await user.save();
 
