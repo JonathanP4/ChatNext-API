@@ -49,10 +49,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
 
-// app.use((req, res, next) => {
-//     console.log(req.cookies);
-//     next();
-// });
+app.use((req, res, next) => {
+    req.headers["access-control-allow-origin"] =
+        "https://chat-next-frontend.vercel.app";
+    next();
+});
 
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
