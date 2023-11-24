@@ -31,28 +31,21 @@ webSocket(httpServer);
 
 app.use(cookieParser(secret));
 
-app.use(
-    cors({
-        origin: origin,
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        credentials: true,
-        allowedHeaders: [
-            "Content-Type",
-            "Authorization",
-            "Access-Control-Allow-Origin",
-        ],
-    })
-);
-
 app.use("/images", express.static(path.join(__dirname, "..", "public/images")));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
 
 app.use((req, res, next) => {
-    req.headers["access-control-allow-origin"] =
-        "https://chat-next-frontend.vercel.app";
-    next();
+    res.header(
+        `Access-Control-Allow-Origin`,
+        `https://chat-next-frontend.vercel.app`
+    );
+    res.header(`Access-Control-Allow-Methods`, `GET,PUT,POST,DELETE`);
+    res.header(
+        `Access-Control-Allow-Headers`,
+        `X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version`
+    );
 });
 
 app.use("/auth", authRoutes);
