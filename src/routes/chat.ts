@@ -4,13 +4,12 @@ import isAuth from "../middleware/isAuth";
 
 const router = Router();
 
+router.get("/profile", isAuth, chatControllers.getProfile);
 router.get("/users", isAuth, chatControllers.getUsers);
+router.get("/messages", isAuth, chatControllers.getMessages);
+
 router.get("/user/:userId", isAuth, chatControllers.getUser);
-router.get("/messages/:userId", isAuth, chatControllers.getMessages);
 
-router.post("/send", isAuth, chatControllers.getUsers);
-router.post("/message", isAuth, chatControllers.postMessage);
-
-router.post("/user/update/:userId", isAuth, chatControllers.updateProfile);
+router.patch("/user/update", isAuth, chatControllers.updateProfile);
 
 export default router;

@@ -1,14 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import User from "../models/user";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { getToken } from "../util/token";
-
-dotenv.config();
-
-const secret = process.env.SECRET as string;
+import { secret } from "../app";
 
 export async function signup(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
@@ -77,15 +73,19 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
         const passwordCorrect = await bcrypt.compare(password, user.password);
         if (!passwordCorrect) {
-            return res
-                .status(401)
-                .json({ message: "Email or password are incorrect" });
+            return res.status(401).json({
+                message: [
+                    { msg: "Email or password are incorrect", status: 401 },
+                ],
+            });
         }
         const token = jwt.sign({ email: user.email, userId: user._id }, secret);
 
-        res.cookie("token", token);
+        res.cookie("token", token, { maxAge: 1000 * 60 * 60 * 24 * 7 });
 
-        return res.status(200).json({ message: "Login successfull", token });
+        return res
+            .status(200)
+            .json({ message: "Login successfull", token, user });
     } catch (error) {
         next(error);
     }

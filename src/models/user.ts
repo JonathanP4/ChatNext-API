@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        socketId: String,
         messages: [
             {
                 type: Schema.Types.ObjectId,

@@ -3,8 +3,6 @@ import { Request, Response, NextFunction, response } from "express";
 import { decodeToken, getToken } from "../util/token";
 import Message from "../models/message";
 
-import socket from "../socket";
-
 export async function getUsers(
     req: Request,
     res: Response,
@@ -37,9 +35,13 @@ export async function getUsers(
     }
 }
 
-export async function getUser(req: Request, res: Response, next: NextFunction) {
+export async function getProfile(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
     try {
-        const userId = req.params.userId;
+        const { userId } = decodeToken(req.cookies.token);
 
         const user = await User.findById(userId).select("-password");
 
@@ -55,39 +57,21 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-export async function postMessage(
-    req: Request,
-    res: Response,
-    next: NextFunction
-) {
+export async function getUser(req: Request, res: Response, next: NextFunction) {
     try {
-        const content = req.body.message;
-        const contact = req.body.user;
+        const userId = req.params.userId;
 
-        const token = getToken(req);
-        const decoded = decodeToken(token);
-
-        const user = await User.findById(decoded.userId);
+        const user = await User.findById(userId).select("-password");
 
         if (!user) {
-            return res.status(500).json("User not found");
+            return res.status(404).json({ message: "User not found" });
         }
 
-        const message = new Message({
-            content,
-            from: user._id,
-            to: contact._id,
-        });
-
-        user.messages.unshift(message._id);
-
-        await message.save();
-        await user.save();
-
-        const io = socket.getIo();
-        io.emit("message", { message: message, action: "post" });
-    } catch (error: any) {
-        next(new Error(error));
+        return res
+            .status(200)
+            .json({ message: "User fetched succesfully", user });
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -111,7 +95,6 @@ export async function getMessages(
         });
 
         if (!userMessages || !contactMessages) {
-            console.log("here");
             return response.status(500).json("User not found");
         }
 
@@ -130,31 +113,17 @@ export async function updateProfile(
     res: Response,
     next: NextFunction
 ) {
-    // uncomment this variable if you want to upload files instead of urls
-    // const image = req.file?.path.replaceAll("public\\", "");
-
     const name = req.body.name;
     const status = req.body.status;
-    const userId = req.params.userId;
-
-    // remove this variable if you want to upload files instead of urls
     const image = req.body.image;
+    const { userId } = decodeToken(req.cookies.token);
+
     try {
         const user = await User.findById(userId);
 
         if (!user) {
             return response.status(500).json("User not found");
         }
-
-        // uncomment this code if you want to upload files instead of urls
-        // if (user.image !== "images/placeholder.jpg") {
-        //     fs.unlink(
-        //         path.join(rootPath, "..", "public", user.image as string),
-        //         () => {
-        //             console.log("deleted file");
-        //         }
-        //     );
-        // }
 
         user.name = name;
         user.status = status;

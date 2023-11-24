@@ -4,7 +4,7 @@
     "description": "",
     "scripts": {
         "build": "pnpm install && tsc",
-        "dev": "nodemon ./dist/app.js"
+        "dev": "nodemon ./src/app.ts"
     },
     "keywords": [],
     "author": "",
@@ -33,7 +33,6 @@
         "express-validator": "^7.0.1",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.0.0",
-        "multer": "1.4.5-lts.1",
         "socket.io": "^4.7.2",
         "universal-cookie": "^6.1.1"
     }
