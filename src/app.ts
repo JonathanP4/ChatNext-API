@@ -31,7 +31,14 @@ webSocket(httpServer);
 
 app.use(cookieParser(secret));
 
-app.use(cors());
+app.use(
+    cors({
+        origin: origin,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"],
+    })
+);
 
 app.use("/images", express.static(path.join(__dirname, "..", "public/images")));
 app.use(bodyParser.urlencoded({ extended: false }));
