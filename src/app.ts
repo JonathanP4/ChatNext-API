@@ -64,13 +64,6 @@ app.use(
     })
 );
 
-app.use((req, res, next) => {
-    res.set({
-        "Access-Control-Request-Headers": "X-Custom-Header",
-    });
-    next();
-});
-
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
 
