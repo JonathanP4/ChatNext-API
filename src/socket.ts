@@ -14,12 +14,22 @@ type MessageType = {
 export function webSocket(httpServer: httpServer) {
     const io = new Server(httpServer, {
         cors: {
-            origin: "https://chat-next-frontend.vercel.app",
+            origin: process.env.ORIGIN,
+            credentials: true,
+            methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+            allowedHeaders: [
+                "Content-Type",
+                "Authorization",
+                "Accept-Type",
+                "Authorization",
+            ],
         },
     });
 
     io.on("connection", async (socket) => {
         console.log(`User ${socket.id} connected`);
+
+        console.log(socket.handshake.auth.token);
 
         const { userId } = decodeToken(socket.handshake.auth.token);
         const user = await User.findById(userId);

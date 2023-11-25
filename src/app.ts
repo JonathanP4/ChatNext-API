@@ -35,19 +35,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
 
-app.use(
-    cors({
-        credentials: true,
-        origin: "https://chat-next-frontend.vercel.app",
-        methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-        allowedHeaders: [
-            "Content-Type",
-            "Authorization",
-            "Accept-Type",
-            "Authorization",
-        ],
-    })
-);
+app.use(cors({ credentials: true, origin: process.env.ORIGIN }));
 
 app.get("/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");
