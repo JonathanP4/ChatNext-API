@@ -22,14 +22,11 @@ dotenv.config();
 export const port = process.env.PORT || 8080;
 export const uri = process.env.URI as string;
 export const secret = process.env.SECRET as string;
-export const origin = process.env.ORIGIN as string;
 
 const app = express();
 const httpServer = createServer(app);
 
 webSocket(httpServer);
-
-app.use(cors({ credentials: true, origin }));
 
 app.use(cookieParser(secret));
 
@@ -37,6 +34,20 @@ app.use("/images", express.static(path.join(__dirname, "..", "public/images")));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
+
+app.use(
+    cors({
+        credentials: true,
+        origin: process.env.ORIGIN,
+        methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "Accept-Type",
+            "Authorization",
+        ],
+    })
+);
 
 app.get("/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");

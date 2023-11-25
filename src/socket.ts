@@ -15,8 +15,6 @@ export function webSocket(httpServer: httpServer) {
     const io = new Server(httpServer, {
         cors: {
             origin: process.env.ORIGIN,
-            methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-            allowedHeaders: ["Content-Type", "Accept-Type", "Authorization"],
         },
     });
 
