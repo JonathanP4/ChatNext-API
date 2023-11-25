@@ -28,7 +28,7 @@ export function webSocket(httpServer: httpServer) {
 
     io.on("connection", async (socket) => {
         console.log(`User ${socket.id} connected`);
-
+        console.log(socket.handshake.auth);
         const decodedToken = decodeToken(socket.handshake.auth.token);
         const { userId } = decodedToken;
 
