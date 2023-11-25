@@ -28,18 +28,21 @@ export function webSocket(httpServer: httpServer) {
 
     io.on("connection", async (socket) => {
         console.log(`User ${socket.id} connected`);
-        console.log(socket.handshake.auth);
-        const decodedToken = decodeToken(socket.handshake.auth.token);
-        const { userId } = decodedToken;
 
-        const user = await User.findById(userId);
+        let user: any;
 
-        if (!user) {
-            throw new Error("User not found");
-        }
+        socket.on("user_id", async (userId: string) => {
+            const dbUser = await User.findById(userId);
 
-        user.socketId = socket.id;
-        await user.save();
+            if (!dbUser) {
+                throw new Error("User not found");
+            }
+
+            dbUser.socketId = socket.id;
+            await dbUser.save();
+
+            user = dbUser;
+        });
 
         socket.broadcast.emit("user_connected");
 
