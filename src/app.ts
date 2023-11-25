@@ -48,6 +48,10 @@ app.use((req, res, next) => {
     );
 });
 
+app.get("/hello", (req, res, next) => {
+    res.write("Hello from ChatNext API");
+});
+
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
 
