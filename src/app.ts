@@ -40,17 +40,36 @@ app.get("/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");
 });
 
+const whitelist = [
+    "https://chat-next-frontend.vercel.app",
+    "http://localhost:3000",
+];
+
 app.use(
     cors({
-        origin,
+        origin: function (origin, callback) {
+            if (whitelist.indexOf(origin!) !== -1 || !origin) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
         credentials: true,
         allowedHeaders: [
             "Content-Type",
             "Authorization",
             "Access-Control-Allow-Origin",
+            "Access-Control-Request-Headers",
         ],
     })
 );
+
+app.use((req, res, next) => {
+    res.set({
+        "Access-Control-Request-Headers": "X-Custom-Header",
+    });
+    next();
+});
 
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
