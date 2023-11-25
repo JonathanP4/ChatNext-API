@@ -36,22 +36,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
 
-app.use((req, res, next) => {
-    res.header(
-        `Access-Control-Allow-Origin`,
-        `https://chat-next-frontend.vercel.app`
-    );
-    res.header(`Access-Control-Allow-Methods`, `GET,PUT,POST,DELETE`);
-    res.header(
-        `Access-Control-Allow-Headers`,
-        `X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version`
-    );
-    next();
-});
-
 app.get("/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");
 });
+
+app.use(
+    cors({
+        origin,
+        credentials: true,
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "Access-Control-Allow-Origin",
+        ],
+    })
+);
 
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
