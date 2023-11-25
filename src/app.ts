@@ -38,7 +38,7 @@ app.use(cookieParser(secret));
 app.use(
     cors({
         credentials: true,
-        origin: process.env.ORIGIN,
+        origin: "https://chat-next-frontend.vercel.app",
         methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allowedHeaders: [
             "Content-Type",

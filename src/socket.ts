@@ -14,7 +14,7 @@ type MessageType = {
 export function webSocket(httpServer: httpServer) {
     const io = new Server(httpServer, {
         cors: {
-            origin: process.env.ORIGIN,
+            origin: "https://chat-next-frontend.vercel.app",
         },
     });
 
