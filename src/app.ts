@@ -29,16 +29,14 @@ const httpServer = createServer(app);
 
 webSocket(httpServer);
 
+app.use(cors({ credentials: true, origin }));
+
 app.use(cookieParser(secret));
 
 app.use("/images", express.static(path.join(__dirname, "..", "public/images")));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
-
-app.use(
-    cors({ credentials: true, origin: "https://chat-next-frontend.vercel.app" })
-);
 
 app.get("/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");

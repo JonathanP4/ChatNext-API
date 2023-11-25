@@ -16,6 +16,7 @@ export function webSocket(httpServer: httpServer) {
         cors: {
             origin: process.env.ORIGIN,
             methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+            allowedHeaders: ["Content-Type", "Accept-Type", "Authorization"],
         },
     });
 
