@@ -7,7 +7,7 @@ import { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth";
@@ -36,33 +36,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
 
+app.use(
+    cors({ credentials: true, origin: "https://chat-next-frontend.vercel.app" })
+);
+
 app.get("/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");
 });
-
-const whitelist = [
-    "https://chat-next-frontend.vercel.app",
-    "http://localhost:3000",
-];
-
-app.use(
-    cors({
-        origin: function (origin, callback) {
-            if (whitelist.indexOf(origin!) !== -1 || !origin) {
-                callback(null, true);
-            } else {
-                callback(new Error("Not allowed by CORS"));
-            }
-        },
-        credentials: true,
-        allowedHeaders: [
-            "Content-Type",
-            "Authorization",
-            "Access-Control-Allow-Origin",
-            "Access-Control-Request-Headers",
-        ],
-    })
-);
 
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);

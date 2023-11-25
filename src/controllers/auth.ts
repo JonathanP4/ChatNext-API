@@ -81,7 +81,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         }
         const token = jwt.sign({ email: user.email, userId: user._id }, secret);
 
-        res.cookie("token", token, { maxAge: 1000 * 60 * 60 * 24 * 7 });
+        res.cookie("token", token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            sameSite: "none",
+            secure: true,
+        });
 
         return res
             .status(200)
