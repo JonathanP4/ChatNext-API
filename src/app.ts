@@ -37,12 +37,12 @@ app.use(cookieParser(secret));
 
 app.use(cors({ credentials: true, origin: process.env.ORIGIN }));
 
-app.get("/hello", (req, res, next) => {
+app.get("/api/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");
 });
 
-app.use("/auth", authRoutes);
-app.use("/chat", chatRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({ message: err.message });
