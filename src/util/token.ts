@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { NextFunction, Request } from "express";
+import { Request } from "express";
 
 type UserType = {
     email: string;
