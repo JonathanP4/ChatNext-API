@@ -12,13 +12,13 @@ export default function isAuth(
     res: Response,
     next: NextFunction
 ) {
-    const token = getToken(req);
+    // const token = getToken(req);
 
-    if (!token) {
-        return res.status(401).json({ message: "Unauthorized user" });
-    }
+    // if (!token) {
+    //     return res.status(401).json({ message: "Unauthorized user" });
+    // }
 
-    jwt.verify(token, secret);
+    // jwt.verify(token, secret);
 
     next();
 }
