@@ -35,7 +35,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(secret));
 
-app.use(cors({ credentials: true, origin: process.env.ORIGIN }));
+app.use(
+    cors({
+        credentials: true,
+        origin: process.env.ORIGIN,
+        methods: ["GET", "POST", "PUT", "PATCH"],
+        allowedHeaders: ["Content-Type", "*"],
+    })
+);
 
 app.get("/api/hello", (req, res, next) => {
     res.write("Hello from ChatNext API");
