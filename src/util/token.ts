@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Request } from "express";
+import { NextFunction, Request } from "express";
 
 type UserType = {
     email: string;
@@ -8,8 +8,10 @@ type UserType = {
     exp: number;
 };
 
-export function getToken(req: Request) {
-    return req.get("Authorization")!.split(" ")[1];
+export function getToken(req: Request, next: NextFunction) {
+    if (req.get("Authorization"))
+        return req.get("Authorization")?.split(" ")[1];
+    else next();
 }
 
 export function decodeToken(token: string) {
