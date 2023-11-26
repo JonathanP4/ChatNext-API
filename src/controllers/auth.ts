@@ -97,9 +97,9 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
 export async function logout(req: Request, res: Response, next: NextFunction) {
     try {
-        const token = getToken(req);
+        // const token = getToken(req);
 
-        jwt.verify(token, secret);
+        // jwt.verify(token, secret);
 
         return res.status(200).json({ message: "Logout successfull" });
     } catch (error) {
