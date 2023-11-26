@@ -8,10 +8,12 @@ type UserType = {
     exp: number;
 };
 
-export function getToken(req: Request, next: NextFunction) {
-    if (req.get("Authorization"))
+export function getToken(req: Request) {
+    if (req.get("Authorization")) {
         return req.get("Authorization")?.split(" ")[1];
-    else next();
+    } else {
+        return "I tried...";
+    }
 }
 
 export function decodeToken(token: string) {
