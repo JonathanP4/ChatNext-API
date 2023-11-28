@@ -5,8 +5,6 @@ import { getToken } from "../util/token";
 
 dotenv.config();
 
-const secret = process.env.SECRET as string;
-
 export default function isAuth(
     req: Request,
     res: Response,
@@ -18,7 +16,7 @@ export default function isAuth(
         return res.status(401).json({ message: "Unauthorized user" });
     }
 
-    // jwt.verify(token, secret);
+    jwt.verify(token, process.env.SECRET!);
 
     next();
 }

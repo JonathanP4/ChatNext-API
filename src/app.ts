@@ -19,28 +19,26 @@ import { webSocket } from "./socket";
 
 dotenv.config();
 
-export const port = process.env.PORT || 8080;
-export const uri = process.env.URI as string;
-export const secret = process.env.SECRET as string;
+export const PORT = process.env.PORT || 8080;
+export const URI = process.env.URI as string;
+export const SECRET = process.env.SECRET as string;
 
 const app = express();
 const httpServer = createServer(app);
 
 webSocket(httpServer);
 
-app.use(cookieParser(secret));
+app.use(cookieParser(SECRET));
 
 app.use("/images", express.static(path.join(__dirname, "..", "public/images")));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cookieParser(secret));
+app.use(cookieParser(SECRET));
 
 app.use(
     cors({
         credentials: true,
         origin: process.env.ORIGIN,
-        methods: ["GET", "POST", "PUT", "PATCH"],
-        allowedHeaders: ["Content-Type", "*"],
     })
 );
 
@@ -58,10 +56,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 (async function main() {
     try {
-        await mongoose.connect(uri);
+        await mongoose.connect(URI);
 
-        httpServer.listen(port, () =>
-            console.log("⚡[server]: Server listening on port " + port)
+        httpServer.listen(PORT, () =>
+            console.log("⚡[server]: Server listening on port " + PORT)
         );
 
         // await Message.deleteMany();

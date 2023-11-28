@@ -4,7 +4,7 @@ import User from "../models/user";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { getToken } from "../util/token";
-import { secret } from "../app";
+import { SECRET } from "../app";
 
 export async function signup(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
@@ -23,12 +23,8 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({
-                message: [
-                    {
-                        msg: "Email invalid",
-                        status: 400,
-                    },
-                ],
+                msg: "Email invalid",
+                status: 400,
             });
         }
 
@@ -79,7 +75,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
                 ],
             });
         }
-        const token = jwt.sign({ email: user.email, userId: user._id }, secret);
+        const token = jwt.sign({ email: user.email, userId: user._id }, SECRET);
 
         res.cookie("token", token, {
             maxAge: 1000 * 60 * 60 * 24 * 7,
@@ -100,7 +96,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
     try {
         const token = getToken(req);
 
-        jwt.verify(token, secret);
+        jwt.verify(token, SECRET);
 
         return res.status(200).json({ message: "Logout successfull" });
     } catch (error) {
