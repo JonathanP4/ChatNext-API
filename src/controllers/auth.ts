@@ -18,15 +18,19 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
     const password = req.body.password;
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 12);
-
         const userExists = await User.findOne({ email });
+
         if (userExists) {
             return res.status(400).json({
-                msg: "Email invalid",
-                status: 400,
+                message: [
+                    {
+                        msg: "Email invalid",
+                    },
+                ],
             });
         }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
 
         const user = new User({
             email,
@@ -68,6 +72,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         }
 
         const passwordCorrect = await bcrypt.compare(password, user.password);
+
         if (!passwordCorrect) {
             return res.status(401).json({
                 message: [
@@ -77,16 +82,9 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         }
         const token = jwt.sign({ email: user.email, userId: user._id }, SECRET);
 
-        res.cookie("token", token, {
-            maxAge: 1000 * 60 * 60 * 24 * 7,
-            sameSite: "none",
-            secure: true,
-            httpOnly: false,
-        });
-
         return res
             .status(200)
-            .json({ message: "Login successfull", token, user });
+            .json({ message: "Login successfull", token, userId: user._id });
     } catch (error) {
         next(error);
     }

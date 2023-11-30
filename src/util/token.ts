@@ -15,3 +15,7 @@ export function getToken(req: Request) {
 export function decodeToken(token: string) {
     return jwt.decode(token) as UserType;
 }
+
+export function validateToken(token: string) {
+    return jwt.verify(token, process.env.SECRET!);
+}
