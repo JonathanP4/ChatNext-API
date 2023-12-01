@@ -68,10 +68,6 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
         }
 
         return res
-            .set({
-                "Access-Control-Allow-Origin":
-                    "https://chat-next-frontend.vercel.app",
-            })
             .status(200)
             .json({ message: "User fetched succesfully", user });
     } catch (error) {

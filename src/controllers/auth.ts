@@ -110,6 +110,10 @@ export async function token(req: Request, res: Response, next: NextFunction) {
         jwt.verify(token, SECRET);
 
         return res
+            .set({
+                "Access-Control-Allow-Origin":
+                    "https://chat-next-frontend.vercel.app",
+            })
             .status(200)
             .json({ message: "User authenticated", isAuth: true });
     } catch (error) {
