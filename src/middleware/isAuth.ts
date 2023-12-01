@@ -18,5 +18,7 @@ export default function isAuth(
 
     jwt.verify(token, process.env.SECRET!);
 
+    console.log(token);
+
     next();
 }

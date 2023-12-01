@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 
 import User from "./models/user";
 import Message from "./models/message";
+import cookie from "cookie";
 import { decodeToken, validateToken } from "./util/token";
 
 type MessageType = {
@@ -43,17 +44,16 @@ export function webSocket(httpServer: httpServer) {
         io.on("connection", async (socket) => {
             console.log(`User ${socket.id} connected`);
 
-            const token = socket.request.headers.cookie
-                ?.split(";")
-                .find((el) => /token/gi.test(el))
-                ?.split("=")[1];
+            const cookies = cookie.parse(socket.request.headers.cookie || "");
 
-            if (!token) {
+            if (!cookies.token) {
                 io.to(socket.id).emit("not_auth", "Not authorized");
                 return;
             }
 
-            console.log(validateToken(token));
+            const { token } = cookies;
+
+            validateToken(token);
 
             const { userId } = decodeToken(token);
             const user = await User.findById(userId);
@@ -64,6 +64,7 @@ export function webSocket(httpServer: httpServer) {
                 });
                 return;
             }
+
             user.socketId = socket.id;
             await user.save();
 
@@ -76,50 +77,51 @@ export function webSocket(httpServer: httpServer) {
                 io.to(socket.id).emit("users", filteredUsers);
             }
 
-            // socket.broadcast.emit("user_connected");
+            socket.on("get_user", async (userId) => {
+                const user = await User.findById(userId).select("-password");
 
-            // socket.on("get_messages", async (contactId) => {
-            //     const sentMessages = await Message.find({
-            //         from: user._id,
-            //         to: contactId,
-            //     });
+                io.to(socket.id).emit("get_user", user);
+            });
 
-            //     const receivedMessages = await Message.find({
-            //         from: contactId,
-            //         to: user._id,
-            //     });
+            socket.on("get_messages", async (contactId) => {
+                const userMessages = await Message.find({
+                    to: contactId,
+                    from: user._id,
+                });
+                const contactMessages = await Message.find({
+                    to: user._id,
+                    from: contactId,
+                });
 
-            //     const allMessages = [...sentMessages, ...receivedMessages];
+                const allMesages = [...userMessages, ...contactMessages].sort(
+                    (a, b) => a._id.toString().localeCompare(b._id.toString())
+                );
 
-            //     allMessages.sort((a, b) =>
-            //         a._id.toString().localeCompare(b._id.toString())
-            //     );
+                io.to(socket.id).emit("get_messages", allMesages);
+            });
 
-            //     io.to(socket.id).emit("get_messages", allMessages);
-            // });
+            socket.on("private_message", async ({ message, to }) => {
+                const newMessage = new Message({
+                    content: message,
+                    from: user._id,
+                    to,
+                });
 
-            // socket.on("private_message", async ({ message, to }) => {
-            //     const newMessage = new Message({
-            //         content: message,
-            //         from: user._id,
-            //         to,
-            //     });
+                user.messages.push(newMessage._id);
 
-            //     user.messages.push(newMessage._id);
+                await newMessage.save();
+                await user.save();
 
-            //     await newMessage.save();
-            //     await user.save();
+                // socket.to would only send the message to the target client
+                // io.emit sends to both client who emitted event and target client
+                io.to(socket.id)
+                    .to(to.socketId)
+                    .emit("private_message", newMessage);
+            });
 
-            //     // socket.to would only send the message to the target client
-            //     // io.emit sends to both client who emitted event and target client
-            //     io.to(socket.id)
-            //         .to(to.socketId)
-            //         .emit("private_message", newMessage);
-            // });
-
-            // socket.on("disconnect", () => {
-            //     console.log(`User ${socket.id} disconnected`);
-            // });
+            socket.on("disconnect", () => {
+                console.log(`User ${socket.id} disconnected`);
+            });
         });
     } catch (err) {
         console.log(err);

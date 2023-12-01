@@ -91,12 +91,27 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function logout(req: Request, res: Response, next: NextFunction) {
+    console.log("logout");
+    // try {
+    //     const token = getToken(req);
+
+    //     jwt.verify(token, SECRET);
+
+    //     return res.status(200).json({ message: "Logout successfull" });
+    // } catch (error) {
+    //     next(error);
+    // }
+}
+
+export async function token(req: Request, res: Response, next: NextFunction) {
     try {
         const token = getToken(req);
 
         jwt.verify(token, SECRET);
 
-        return res.status(200).json({ message: "Logout successfull" });
+        return res
+            .status(200)
+            .json({ message: "User authenticated", isAuth: true });
     } catch (error) {
         next(error);
     }
