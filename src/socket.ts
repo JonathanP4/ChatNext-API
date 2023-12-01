@@ -43,6 +43,7 @@ export function webSocket(httpServer: httpServer) {
 
         io.on("connection", async (socket) => {
             console.log(`User ${socket.id} connected`);
+            console.log(socket.request.headers.cookie);
 
             const cookies = cookie.parse(socket.request.headers.cookie || "");
 
