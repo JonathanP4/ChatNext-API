@@ -59,9 +59,9 @@ export function webSocket(httpServer: httpServer) {
             const user = await User.findById(userId);
 
             if (!user) {
-                io.to(socket.id).emit("user_undefined", {
-                    error: new Error("User not found, try reloading the page"),
-                });
+                // io.to(socket.id).emit("user_undefined", {
+                //     error: new Error("User not found, try reloading the page"),
+                // });
                 return;
             }
 
