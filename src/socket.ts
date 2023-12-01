@@ -46,10 +46,10 @@ export function webSocket(httpServer: httpServer) {
 
             const cookies = cookie.parse(socket.request.headers.cookie || "");
 
-            // if (!cookies.token) {
-            //     io.to(socket.id).emit("not_auth", "Not authorized");
-            //     return;
-            // }
+            if (!cookies.token) {
+                io.to(socket.id).emit("not_auth", "Not authorized");
+                return;
+            }
 
             const { token } = cookies;
 
@@ -58,21 +58,21 @@ export function webSocket(httpServer: httpServer) {
             const { userId } = decodeToken(token);
             const user = await User.findById(userId);
 
-            // if (!user) {
-            //     // io.to(socket.id).emit("user_undefined", {
-            //     //     error: new Error("User not found, try reloading the page"),
-            //     // });
-            //     return;
-            // }
+            if (!user) {
+                io.to(socket.id).emit("user_undefined", {
+                    error: new Error("User not found, try reloading the page"),
+                });
+                return;
+            }
 
-            user!.socketId = socket.id;
-            await user!.save();
+            user.socketId = socket.id;
+            await user.save();
 
             const users = await User.find().select("-password");
 
             if (users) {
                 const filteredUsers = users.filter(
-                    (u) => u._id.toString() !== user!._id.toString()
+                    (u) => u._id.toString() !== user._id.toString()
                 );
                 io.to(socket.id).emit("users", filteredUsers);
             }
@@ -86,10 +86,10 @@ export function webSocket(httpServer: httpServer) {
             socket.on("get_messages", async (contactId) => {
                 const userMessages = await Message.find({
                     to: contactId,
-                    from: user!._id,
+                    from: user._id,
                 });
                 const contactMessages = await Message.find({
-                    to: user!._id,
+                    to: user._id,
                     from: contactId,
                 });
 
@@ -103,14 +103,14 @@ export function webSocket(httpServer: httpServer) {
             socket.on("private_message", async ({ message, to }) => {
                 const newMessage = new Message({
                     content: message,
-                    from: user!._id,
+                    from: user._id,
                     to,
                 });
 
-                user!.messages.push(newMessage._id);
+                user.messages.push(newMessage._id);
 
                 await newMessage.save();
-                await user!.save();
+                await user.save();
 
                 // socket.to would only send the message to the target client
                 // io.emit sends to both client who emitted event and target client
