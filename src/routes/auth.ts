@@ -30,6 +30,4 @@ router.post(
 );
 router.post("/logout", isAuth, authController.logout);
 
-router.get("/token", authController.token);
-
 export default router;

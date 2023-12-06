@@ -42,7 +42,9 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
         });
         await user.save();
 
-        return res.status(201).json({ message: "User created", user });
+        return res
+            .status(201)
+            .json({ message: "User created", userId: user._id });
     } catch (error) {
         next(error);
     }
@@ -101,22 +103,4 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
     // } catch (error) {
     //     next(error);
     // }
-}
-
-export async function token(req: Request, res: Response, next: NextFunction) {
-    try {
-        const token = getToken(req);
-
-        jwt.verify(token, SECRET);
-
-        return res
-            .set({
-                "Access-Control-Allow-Origin":
-                    "https://chat-next-frontend.vercel.app",
-            })
-            .status(200)
-            .json({ message: "User authenticated", isAuth: true });
-    } catch (error) {
-        next(error);
-    }
 }

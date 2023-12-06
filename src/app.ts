@@ -37,7 +37,6 @@ app.use(cookieParser(SECRET));
 
 app.use(
     cors({
-        credentials: true,
         origin: process.env.ORIGIN,
     })
 );
@@ -62,13 +61,13 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
             console.log("⚡[server]: Server listening on port " + PORT)
         );
 
-        // await Message.deleteMany();
-        // const users = await User.find();
+        await Message.deleteMany();
+        const users = await User.find();
 
-        // users.forEach(async (user) => {
-        //     user.messages = [];
-        //     await user.save();
-        // });
+        users.forEach(async (user) => {
+            user.messages = [];
+            await user.save();
+        });
     } catch (error) {
         console.log(error);
     }
