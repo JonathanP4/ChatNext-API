@@ -61,13 +61,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
             console.log("⚡[server]: Server listening on port " + PORT)
         );
 
-        await Message.deleteMany();
-        const users = await User.find();
-
-        users.forEach(async (user) => {
-            user.messages = [];
-            await user.save();
-        });
+        // await User.deleteMany({});
     } catch (error) {
         console.log(error);
     }
