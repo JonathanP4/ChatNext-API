@@ -34,6 +34,7 @@ export function webSocket(httpServer: httpServer) {
         });
 
         io.on("connection", async (socket) => {
+            //h
             console.log(socket.handshake.auth);
         });
     } catch (err) {
