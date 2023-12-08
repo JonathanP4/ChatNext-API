@@ -60,8 +60,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         httpServer.listen(PORT, () =>
             console.log("⚡[server]: Server listening on port " + PORT)
         );
-
-        // await User.deleteMany({});
     } catch (error) {
         console.log(error);
     }

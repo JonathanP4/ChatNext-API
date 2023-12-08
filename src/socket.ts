@@ -34,7 +34,7 @@ export function webSocket(httpServer: httpServer) {
         });
 
         io.on("connection", async (socket) => {
-            const token = socket.handshake.auth.token.value;
+            const token = socket.handshake.auth.token;
 
             if (!token) {
                 io.to(socket.id).emit("not_auth", "Not authenticated");
@@ -64,9 +64,37 @@ export function webSocket(httpServer: httpServer) {
 
                 socket.emit("get_user", contact);
             });
-            // socket.on("private_message", () => {
-            //     io.to(socket.id).to()
-            // })
+
+            socket.on("get_messages", async (userId) => {
+                const userMessages = await Message.find({
+                    from: user._id,
+                    to: userId,
+                });
+                const contactMessages = await Message.find({
+                    from: userId,
+                    to: user._id,
+                });
+
+                const allMessages = [...userMessages, ...contactMessages].sort(
+                    (a, b) => a._id.toString().localeCompare(b._id.toString())
+                );
+
+                io.to(socket.id).emit("get_messages", allMessages);
+            });
+
+            socket.on("private_message", async ({ message, to }) => {
+                const privateMessage = new Message({
+                    content: message,
+                    from: user._id,
+                    to: to._id,
+                });
+
+                await privateMessage.save();
+
+                io.to(socket.id)
+                    .to(to.socketId)
+                    .emit("private_message", privateMessage);
+            });
         });
     } catch (err) {
         console.log(err);

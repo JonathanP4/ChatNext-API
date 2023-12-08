@@ -10,7 +10,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return res.status(401).json({ message: errors.array() });
+        return res.status(401).json({ status: 401, message: errors.array() });
     }
 
     const email = req.body.email;
@@ -22,6 +22,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
 
         if (userExists) {
             return res.status(400).json({
+                status: 400,
                 message: [
                     {
                         msg: "Email invalid",
@@ -54,7 +55,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return res.status(401).json({ message: errors.array() });
+        return res.status(401).json({ status: 401, message: errors.array() });
     }
 
     const email = req.body.email;
@@ -64,6 +65,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({
+                status: 401,
                 message: [
                     {
                         msg: "Email or password are incorrect",
@@ -77,6 +79,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
         if (!passwordCorrect) {
             return res.status(401).json({
+                status: 401,
                 message: [
                     { msg: "Email or password are incorrect", status: 401 },
                 ],
