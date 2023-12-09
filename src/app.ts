@@ -12,6 +12,8 @@ import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth";
 import chatRoutes from "./routes/chat";
+import userRoutes from "./routes/user";
+
 import Message from "./models/message";
 import User from "./models/user";
 
@@ -47,6 +49,7 @@ app.get("/api/hello", (req, res, next) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/user", userRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({ message: err.message });
@@ -60,6 +63,15 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         httpServer.listen(PORT, () =>
             console.log("⚡[server]: Server listening on port " + PORT)
         );
+
+        const users = await User.find({});
+
+        users.forEach(async (u) => {
+            u.messages = [];
+            await u.save();
+        });
+
+        await Message.deleteMany({});
     } catch (error) {
         console.log(error);
     }

@@ -57,31 +57,6 @@ export function webSocket(httpServer: httpServer) {
 
             socket.broadcast.emit("user_connected");
 
-            socket.on("get_user", async (userId) => {
-                const contact = await User.findById(userId);
-
-                if (!contact) return;
-
-                socket.emit("get_user", contact);
-            });
-
-            socket.on("get_messages", async (userId) => {
-                const userMessages = await Message.find({
-                    from: user._id,
-                    to: userId,
-                });
-                const contactMessages = await Message.find({
-                    from: userId,
-                    to: user._id,
-                });
-
-                const allMessages = [...userMessages, ...contactMessages].sort(
-                    (a, b) => a._id.toString().localeCompare(b._id.toString())
-                );
-
-                io.to(socket.id).emit("get_messages", allMessages);
-            });
-
             socket.on("private_message", async ({ message, to }) => {
                 const privateMessage = new Message({
                     content: message,
@@ -89,11 +64,22 @@ export function webSocket(httpServer: httpServer) {
                     to: to._id,
                 });
 
-                await privateMessage.save();
+                user.messages.push(privateMessage._id);
 
-                io.to(socket.id)
-                    .to(to.socketId)
+                await privateMessage.save();
+                await user.save();
+
+                io.to(to.socketId)
+                    .to(socket.id)
                     .emit("private_message", privateMessage);
+            });
+
+            socket.on("latest_message", async (message) => {
+                const contact = await User.findById(message.to);
+
+                if (!contact) return;
+
+                io.to(contact.socketId!).emit("latest_message", message);
             });
         });
     } catch (err) {

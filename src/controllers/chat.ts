@@ -26,50 +26,11 @@ export async function getUsers(
                     "Failed to fetch users from database, we are sorry for the inconvinience.",
             });
         }
+
         return res.json({
             message: "Users fetching succeeded",
             users: filteredUsers,
         });
-    } catch (error) {
-        next(error);
-    }
-}
-
-export async function getProfile(
-    req: Request,
-    res: Response,
-    next: NextFunction
-) {
-    try {
-        const { userId } = decodeToken(req.cookies.token);
-
-        const user = await User.findById(userId).select("-password");
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        return res
-            .status(200)
-            .json({ message: "User fetched succesfully", user });
-    } catch (error) {
-        next(error);
-    }
-}
-
-export async function getUser(req: Request, res: Response, next: NextFunction) {
-    try {
-        const userId = req.params.userId;
-
-        const user = await User.findById(userId).select("-password");
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        return res
-            .status(200)
-            .json({ message: "User fetched succesfully", user });
     } catch (error) {
         next(error);
     }
@@ -81,57 +42,27 @@ export async function getMessages(
     next: NextFunction
 ) {
     try {
-        const contactId = req.params.userId;
         const token = getToken(req);
-        const decoded = decodeToken(token);
+
+        const { userId } = decodeToken(token);
+
+        const contactId = req.body._id;
 
         const userMessages = await Message.find({
-            from: decoded.userId,
+            from: userId,
             to: contactId,
         });
+
         const contactMessages = await Message.find({
             from: contactId,
-            to: decoded.userId,
+            to: userId,
         });
 
-        if (!userMessages || !contactMessages) {
-            return response.status(500).json("User not found");
-        }
-
-        const messages = [...userMessages, ...contactMessages].sort((a, b) =>
+        const allMessages = [...userMessages, ...contactMessages].sort((a, b) =>
             a._id.toString().localeCompare(b._id.toString())
         );
 
-        return res.status(200).json({ messages });
-    } catch (error: any) {
-        next(new Error(error));
-    }
-}
-
-export async function updateProfile(
-    req: Request,
-    res: Response,
-    next: NextFunction
-) {
-    const name = req.body.name;
-    const status = req.body.status;
-    const image = req.body.image;
-    const { userId } = decodeToken(req.cookies.token);
-
-    try {
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return response.status(500).json("User not found");
-        }
-
-        user.name = name;
-        user.status = status;
-        user.image = image;
-
-        await user.save();
-
-        return res.status(201).json({ message: "User updated", user });
+        return res.status(200).json({ messages: allMessages });
     } catch (error: any) {
         next(new Error(error));
     }
