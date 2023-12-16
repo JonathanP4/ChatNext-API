@@ -7,7 +7,7 @@ import { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import cors, { CorsOptions } from "cors";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth";
@@ -64,14 +64,14 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
             console.log("⚡[server]: Server listening on port " + PORT)
         );
 
-        const users = await User.find({});
+        // const users = await User.find({});
 
-        users.forEach(async (u) => {
-            u.messages = [];
-            await u.save();
-        });
+        // users.forEach(async (u) => {
+        //     u.messages = [];
+        //     await u.save();
+        // });
 
-        await Message.deleteMany({});
+        // await Message.deleteMany({});
     } catch (error) {
         console.log(error);
     }
