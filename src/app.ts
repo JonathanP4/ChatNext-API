@@ -1,4 +1,3 @@
-import path from "path";
 import { createServer } from "http";
 
 import express from "express";
@@ -32,7 +31,6 @@ webSocket(httpServer);
 
 app.use(cookieParser(SECRET));
 
-app.use("/images", express.static(path.join(__dirname, "..", "public/images")));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser(SECRET));
@@ -52,7 +50,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/user", userRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ status: 500, message: err.message });
     next();
 });
 

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Request } from "express";
 
-type UserType = {
+export type UserType = {
     email: string;
     userId: string;
     iat: number;

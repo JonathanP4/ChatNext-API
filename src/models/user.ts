@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema(
                 ref: "Message",
             },
         ],
+        trustedLinks: [
+            {
+                origin: String,
+            },
+        ],
     },
     { timestamps: true }
 );

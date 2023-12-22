@@ -96,14 +96,13 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function logout(req: Request, res: Response, next: NextFunction) {
-    console.log("logout");
-    // try {
-    //     const token = getToken(req);
+    try {
+        const token = getToken(req);
 
-    //     jwt.verify(token, SECRET);
+        jwt.verify(token, SECRET);
 
-    //     return res.status(200).json({ message: "Logout successfull" });
-    // } catch (error) {
-    //     next(error);
-    // }
+        return res.status(200).json({ message: "Logout successfull" });
+    } catch (error) {
+        next(error);
+    }
 }
