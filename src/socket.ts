@@ -3,7 +3,6 @@ import { Server } from "socket.io";
 
 import User from "./models/user";
 import Message from "./models/message";
-import cookie from "cookie";
 import { decodeToken, validateToken } from "./util/token";
 
 type MessageType = {
@@ -80,6 +79,31 @@ export function webSocket(httpServer: httpServer) {
                 if (!contact) return;
 
                 io.to(contact.socketId!).emit("latest_message", message);
+            });
+
+            socket.on("delete-message", async (msgId) => {
+                const message = await Message.findByIdAndDelete(msgId);
+                const user = await User.findById(message?.from);
+                const contact = await User.findById(message?.to);
+
+                if (!user || !message || !contact) {
+                    return;
+                }
+
+                const newMessages = user.messages.filter(
+                    (msg) => msg.toString() !== msgId
+                );
+
+                user.messages = newMessages;
+                await user.save();
+
+                if (!user.socketId || !contact.socketId) {
+                    return;
+                }
+
+                io.to(user.socketId)
+                    .to(contact.socketId)
+                    .emit("message-deleted");
             });
         });
     } catch (err) {

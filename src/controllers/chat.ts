@@ -88,8 +88,6 @@ export async function checkLink(
                 .json({ message: "User not found", status: 404 });
         }
 
-        const origin = new URL(url).origin;
-
         const isTrusted = user?.trustedLinks?.some(({ origin }) =>
             url.match(origin)
         );
