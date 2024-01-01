@@ -98,6 +98,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 export async function logout(req: Request, res: Response, next: NextFunction) {
     try {
         const token = getToken(req);
+        console.log(token);
 
         jwt.verify(token, SECRET);
 

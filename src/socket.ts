@@ -6,9 +6,14 @@ import Message from "./models/message";
 import { decodeToken, validateToken } from "./util/token";
 
 type MessageType = {
+    _id: string;
     content: string;
     from: string;
     to: string;
+    replyTo?: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
 };
 
 type UserType = {
@@ -22,6 +27,8 @@ type UserType = {
     createdAt: string;
     updatedAt: string;
     __v: number;
+    socketId: string;
+    trustedLinks: [{ origin: string; id: string }];
 };
 
 export function webSocket(httpServer: httpServer) {
@@ -56,24 +63,33 @@ export function webSocket(httpServer: httpServer) {
 
             socket.broadcast.emit("user_connected");
 
-            socket.on("private_message", async ({ message, to }) => {
-                const privateMessage = new Message({
-                    content: message,
-                    from: user._id,
-                    to: to._id,
-                });
+            socket.on(
+                "private_message",
+                async ({
+                    message,
+                    to,
+                }: {
+                    message: MessageType;
+                    to: UserType;
+                }) => {
+                    const privateMessage = new Message({
+                        content: message,
+                        from: user._id,
+                        to: to._id,
+                    });
 
-                user.messages.push(privateMessage._id);
+                    user.messages.push(privateMessage._id);
 
-                await privateMessage.save();
-                await user.save();
+                    await privateMessage.save();
+                    await user.save();
 
-                io.to(to.socketId)
-                    .to(socket.id)
-                    .emit("private_message", privateMessage);
-            });
+                    io.to(to.socketId)
+                        .to(socket.id)
+                        .emit("private_message", privateMessage);
+                }
+            );
 
-            socket.on("latest_message", async (message) => {
+            socket.on("latest_message", async (message: MessageType) => {
                 const contact = await User.findById(message.to);
 
                 if (!contact) return;
@@ -81,12 +97,11 @@ export function webSocket(httpServer: httpServer) {
                 io.to(contact.socketId!).emit("latest_message", message);
             });
 
-            socket.on("delete-message", async (msgId) => {
+            socket.on("delete-message", async (msgId: string) => {
                 const message = await Message.findByIdAndDelete(msgId);
-                const user = await User.findById(message?.from);
                 const contact = await User.findById(message?.to);
 
-                if (!user || !message || !contact) {
+                if (!message || !contact) {
                     return;
                 }
 
@@ -97,14 +112,75 @@ export function webSocket(httpServer: httpServer) {
                 user.messages = newMessages;
                 await user.save();
 
-                if (!user.socketId || !contact.socketId) {
+                if (!contact.socketId) {
                     return;
                 }
 
-                io.to(user.socketId)
-                    .to(contact.socketId)
-                    .emit("message-deleted");
+                io.to(socket.id).to(contact.socketId).emit("message-deleted");
             });
+
+            socket.on(
+                "message_edit",
+                async ({
+                    messageId,
+                    content,
+                }: {
+                    messageId: string;
+                    content: string;
+                }) => {
+                    const message = await Message.findById(messageId);
+
+                    if (!message) {
+                        return;
+                    }
+
+                    const contact = await User.findById(message.to);
+
+                    message.content = content;
+                    await message.save();
+
+                    if (!contact?.socketId) return;
+
+                    io.to(socket.id).to(contact.socketId).emit("message_edit");
+                }
+            );
+
+            socket.on(
+                "message_reply",
+                async ({
+                    repliedMessage,
+                    content,
+                }: {
+                    repliedMessage: MessageType;
+                    content: string;
+                }) => {
+                    const message = new Message({
+                        content,
+                        from: user._id,
+                        replyTo: {
+                            content: repliedMessage.content,
+                            messageId: repliedMessage._id,
+                        },
+                        to: repliedMessage.from,
+                    });
+
+                    await message.save();
+
+                    const contact = await User.findById(message.to);
+
+                    if (!contact || !contact?.socketId) {
+                        io.to(socket.id).emit(
+                            "user_undefined",
+                            "User not found"
+                        );
+                        return;
+                    }
+
+                    io.to(socket.id)
+                        .to(contact.socketId)
+                        .emit("message-reply", message);
+                }
+            );
         });
     } catch (err) {
         console.log(err);

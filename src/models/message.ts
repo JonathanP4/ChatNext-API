@@ -14,6 +14,10 @@ const messageSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "User",
         },
+        replyTo: {
+            content: String,
+            messageId: Schema.Types.ObjectId,
+        },
     },
     { timestamps: true }
 );
